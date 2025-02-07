@@ -1,0 +1,18 @@
+:root {
+  --color-primary: #1CA961;
+  --color-primary-light: #4BD88F;
+  --color-primary-dark: #167D49;
+  --color-primary-alpha: rgba(28, 169, 97, 0.1);
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #9BA1A9;
+  --color-text-disabled: #6F767E;
+  --color-background: #141716;
+  --color-surface-primary: #222326;
+  --color-surface-secondary: #191B1F;
+  --color-border: #292B2F;
+  --color-success: #1CA961;
+  --color-error: #FF4B4B;
+  --color-warning: #FFB800;
+  --color-info: #3B82F6;
+  /* ... define other colors */
+} 
