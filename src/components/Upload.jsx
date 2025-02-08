@@ -194,22 +194,56 @@ const Upload = () => {
   };
 
   if (isSessionLoading || isUploading) {
-    return <LoadingScreen />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="container relative">
+          <div className="relative z-1 max-w-[62rem] mx-auto text-center">
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-[80px] h-[80px] border-4 border-n-1/10 border-t-color-1 rounded-full animate-spin mb-6"></div>
+              <p className="h4 text-n-1/50">Loading...</p>
+            </div>
+          </div>
+
+          {/* Background gradient */}
+          <div className="absolute top-0 -left-[10rem] w-[56.625rem] h-[56.625rem] opacity-50 mix-blend-color-dodge pointer-events-none">
+            <img
+              className="absolute top-1/2 left-1/2 w-[79.5625rem] h-[88.5625rem] -translate-x-1/2 -translate-y-1/2"
+              src={gradient}
+              alt="Gradient"
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <>
-      <Section className="pt-[12rem] -mt-[5.25rem]" crosses>
-        <div className="container relative">
-          {/* Background gradient */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[71.75rem] h-[50rem] opacity-50 mix-blend-color-dodge pointer-events-none">
-            <img className="w-full h-full object-cover" src={gradient} alt="Gradient" />
-          </div>
+    <Section className="pt-[12rem] -mt-[5.25rem]" crosses>
+      <div className="container relative">
+        {/* Background gradient */}
+        <div className="absolute top-0 -left-[10rem] w-[56.625rem] h-[56.625rem] opacity-50 mix-blend-color-dodge pointer-events-none">
+          <img
+            className="absolute top-1/2 left-1/2 w-[79.5625rem] h-[88.5625rem] -translate-x-1/2 -translate-y-1/2"
+            src={gradient}
+            alt="Gradient"
+          />
+        </div>
 
-          <div className="relative z-1 max-w-[40rem] mx-auto">
-            <h1 className="h1 mb-6 text-center">Upload Document</h1>
-            
-            <div className="flex justify-center mb-4">
+        {/* Header Section */}
+        <div className="relative z-1 max-w-[62rem] mx-auto text-center mb-12">
+          <h1 className="h1 mb-6">
+            Upload Document
+          </h1>
+          <p className="body-1 max-w-3xl mx-auto text-n-2">
+            Upload your PDF document to start analyzing
+          </p>
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-1 max-w-[40rem] mx-auto">
+          <div className="bg-n-8 border border-n-6 rounded-2xl overflow-hidden p-8">
+            {/* Document Counter */}
+            <div className="flex justify-center mb-8">
               <div className="px-4 py-2 rounded-xl bg-n-6">
                 <p className="text-sm text-n-3">
                   Documents: <span className="text-n-1">{documentCount}/{STANDARD_MAX_DOC_COUNT}</span>
@@ -217,10 +251,6 @@ const Upload = () => {
               </div>
             </div>
 
-            <p className="body-1 mb-8 text-n-2 text-center">
-              Upload your PDF document to start analyzing
-            </p>
-            
             {/* Upload Type Toggle */}
             <div className="flex justify-center mb-8">
               <div className="inline-flex bg-n-6 rounded-lg p-1">
@@ -242,7 +272,8 @@ const Upload = () => {
                 </button>
               </div>
             </div>
-            
+
+            {/* Upload Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {/* Document Title */}
               <div>
@@ -336,30 +367,29 @@ const Upload = () => {
             </form>
           </div>
         </div>
-      </Section>
 
-      {/* Success Modal */}
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={handleSuccessModalClose}
-        title="Upload Successful"
-        message={`Your document has been successfully uploaded${
-          documentCount < STANDARD_MAX_DOC_COUNT 
-            ? `. You can upload ${STANDARD_MAX_DOC_COUNT - documentCount} more document${STANDARD_MAX_DOC_COUNT - documentCount === 1 ? '' : 's'}.`
-            : ' and you have now reached your document limit.'
-        }`}
-        type="success"
-      />
+        {/* Modals */}
+        <Modal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          title="Upload Successful"
+          message={`Your document has been successfully uploaded${
+            documentCount < STANDARD_MAX_DOC_COUNT 
+              ? `. You can upload ${STANDARD_MAX_DOC_COUNT - documentCount} more document${STANDARD_MAX_DOC_COUNT - documentCount === 1 ? '' : 's'}.`
+              : ' and you have now reached your document limit.'
+          }`}
+          type="success"
+        />
 
-      {/* Error Modal */}
-      <Modal
-        isOpen={showErrorModal}
-        onClose={() => setShowErrorModal(false)}
-        title={documentCount >= STANDARD_MAX_DOC_COUNT ? "Document Limit Reached" : "Upload Failed"}
-        message={errorMessage}
-        type="error"
-      />
-    </>
+        <Modal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          title={documentCount >= STANDARD_MAX_DOC_COUNT ? "Document Limit Reached" : "Upload Failed"}
+          message={errorMessage}
+          type="error"
+        />
+      </div>
+    </Section>
   );
 };
 

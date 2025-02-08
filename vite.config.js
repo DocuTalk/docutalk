@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/docutalk",
+  base: '/docutalk/', // This is important for GitHub Pages
   envPrefix: 'DOCUTALK_',
   resolve: {
     alias: {
@@ -15,6 +15,10 @@ export default defineConfig({
     include: ['appwrite'],
   },
   build: {
+    outDir: 'build',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: true,
     commonjsOptions: {
       include: [/appwrite/, /node_modules/],
     },

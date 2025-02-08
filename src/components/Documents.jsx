@@ -130,35 +130,39 @@ const Documents = () => {
   };
 
   if (isSessionLoading || isLoading) {
-    return <LoadingScreen />;
-  }
-
-  return (
-    <>
-      <Section 
-        className="pt-[12rem] -mt-[5.25rem]"
-        crosses
-        crossesOffset="lg:translate-y-[5.25rem]"
-      >
+    return (
+      <div className="flex items-center justify-center min-h-screen">
         <div className="container relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[71.75rem] h-[50rem] opacity-50 mix-blend-color-dodge pointer-events-none">
+          <div className="relative z-1 max-w-[62rem] mx-auto text-center">
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-[80px] h-[80px] border-4 border-n-1/10 border-t-color-1 rounded-full animate-spin mb-6"></div>
+              <p className="h4 text-n-1/50">Loading...</p>
+            </div>
+          </div>
+
+          {/* Background gradient */}
+          <div className="absolute top-0 -left-[10rem] w-[56.625rem] h-[56.625rem] opacity-50 mix-blend-color-dodge pointer-events-none">
             <img
-              className="w-full h-full object-cover"
+              className="absolute top-1/2 left-1/2 w-[79.5625rem] h-[88.5625rem] -translate-x-1/2 -translate-y-1/2"
               src={gradient}
               alt="Gradient"
             />
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="relative z-1 max-w-[62rem] mx-auto text-center mb-[4rem]">
-            <h1 className="h1 mb-6">
-              Your Documents
-            </h1>
-            <p className="body-1 max-w-3xl mx-auto text-n-2">
-              View and manage your analyzed documents
-            </p>
-          </div>
-
-          <div className="relative z-1 max-w-[90rem] mx-auto">
+  return (
+    <Section className="pt-[12rem] -mt-[5.25rem]" crosses crossesOffset="lg:translate-y-[5.25rem]">
+      <div className="container relative">
+        <div className="relative z-1 max-w-[62rem] mx-auto">
+          <h1 className="h1 mb-6 text-center">Your Documents</h1>
+          <p className="text-n-3 text-center text-lg mb-12">
+            View and manage your analyzed documents
+          </p>
+          
+          <div className="bg-n-8 border border-n-6 rounded-2xl p-8">
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {documents.map((doc) => (
@@ -180,63 +184,73 @@ const Documents = () => {
               </div>
             )}
           </div>
-
-          {selectedDocument && (
-            <DocumentPreviewDialog
-              isOpen={showPreview}
-              onClose={handleClosePreview}
-              document={selectedDocument}
-            />
-          )}
         </div>
-      </Section>
 
-      <ConfirmDialog
-        isOpen={showSignOutDialog}
-        onClose={handleCloseSignOutDialog}
-        onConfirm={handleSignOut}
-        title="Sign Out Confirmation"
-        message="You're about to sign out of DocuTalk. You'll need to sign in again to access your documents and continue your conversations."
-      />
+        {/* Background gradient */}
+        <div className="absolute top-0 -left-[10rem] w-[56.625rem] h-[56.625rem] opacity-50 mix-blend-color-dodge pointer-events-none">
+          <img
+            className="absolute top-1/2 left-1/2 w-[79.5625rem] h-[88.5625rem] -translate-x-1/2 -translate-y-1/2"
+            src={gradient}
+            alt="Gradient"
+          />
+        </div>
 
-      <Modal
-        isOpen={showSuccessModal && !!deletedDocument}
-        onClose={() => {
-          setShowSuccessModal(false);
-          setDeletedDocument(null);
-        }}
-        title="Document Deleted"
-        message={deletedDocument ? `"${deletedDocument.title}" has been successfully deleted from your documents.` : ''}
-        type="success"
-      />
+        {/* Modals */}
+        {selectedDocument && (
+          <DocumentPreviewDialog
+            isOpen={showPreview}
+            onClose={handleClosePreview}
+            document={selectedDocument}
+          />
+        )}
 
-      <Modal
-        isOpen={showErrorModal}
-        onClose={() => setShowErrorModal(false)}
-        title="Unable to Delete Document"
-        message="We couldn't delete this document at this time. Please try again later or contact support if the problem persists."
-        type="error"
-      />
+        <ConfirmDialog
+          isOpen={showSignOutDialog}
+          onClose={handleCloseSignOutDialog}
+          onConfirm={handleSignOut}
+          title="Sign Out Confirmation"
+          message="You're about to sign out of DocuTalk. You'll need to sign in again to access your documents and continue your conversations."
+        />
 
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
-        title="Delete Document"
-        message={`Are you sure you want to delete "${selectedDocument?.title}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Keep"
-        type="confirm"
-      />
+        <Modal
+          isOpen={showSuccessModal && !!deletedDocument}
+          onClose={() => {
+            setShowSuccessModal(false);
+            setDeletedDocument(null);
+          }}
+          title="Document Deleted"
+          message={deletedDocument ? `"${deletedDocument.title}" has been successfully deleted from your documents.` : ''}
+          type="success"
+        />
 
-      <Modal
-        isOpen={showUploadErrorModal}
-        onClose={() => setShowUploadErrorModal(false)}
-        title="Upload Failed"
-        message="We couldn't upload your document at this time. Please check your file and try again, or contact support if you need help."
-        type="error"
-      />
-    </>
+        <Modal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          title="Unable to Delete Document"
+          message="We couldn't delete this document at this time. Please try again later or contact support if the problem persists."
+          type="error"
+        />
+
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Document"
+          message={`Are you sure you want to delete "${selectedDocument?.title}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Keep"
+          type="confirm"
+        />
+
+        <Modal
+          isOpen={showUploadErrorModal}
+          onClose={() => setShowUploadErrorModal(false)}
+          title="Upload Failed"
+          message="We couldn't upload your document at this time. Please check your file and try again, or contact support if you need help."
+          type="error"
+        />
+      </div>
+    </Section>
   );
 };
 

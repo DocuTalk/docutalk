@@ -1,0 +1,23 @@
+{
+  "main": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-docutalkweb-main-97b10-authRole",
+      "UnauthRoleArn": "arn:aws:iam::888577036575:role/amplify-docutalkweb-main-97b10-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::888577036575:role/amplify-docutalkweb-main-97b10-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-docutalkweb-main-97b10-deployment",
+      "UnauthRoleName": "amplify-docutalkweb-main-97b10-unauthRole",
+      "StackName": "amplify-docutalkweb-main-97b10",
+      "StackId": "arn:aws:cloudformation:eu-west-2:888577036575:stack/amplify-docutalkweb-main-97b10/2efb8b90-e664-11ef-8af4-06dc10ff01d5",
+      "AmplifyAppId": "d2ltt9ykpq8oxd"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2ltt9ykpq8oxd",
+          "type": "cicd"
+        }
+      }
+    }
+  }
+}

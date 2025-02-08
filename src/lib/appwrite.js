@@ -2,7 +2,6 @@ import { Client, Account, ID, Databases, Query, Avatars, Permission, Role, Stora
 import config from '../config/config';
 
 const DEFAULT_PDF_THUMBNAIL = 'https://cdn4.iconfinder.com/data/icons/file-extension-names-vol-8/512/24-512.png';
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
 
 class AuthService {
     constructor() {

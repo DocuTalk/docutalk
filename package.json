@@ -5,13 +5,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"npm run proxy\"",
+    "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proxy": "node server/proxy.js",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d build",
+    "build:save": "npm run build && mkdir -p builds/build_$(date +%Y%m%d_%H%M%S) && cp -r build/* builds/build_$(date +%Y%m%d_%H%M%S)/"
   },
   "dependencies": {
     "@types/react": "^18.2.55",
