@@ -189,11 +189,11 @@ class AuthService {
             localStorage.setItem('appwrite_session', 'true');
             
             // Get user data
-            const user = await this.getCurrentUser();
+            let updatedUser = await this.getCurrentUser();
             
             // Check if we need to reset query count
-            if (user) {
-                const lastUpdated = new Date(user.$updatedAt);
+            if (updatedUser) {
+                const lastUpdated = new Date(updatedUser.$updatedAt);
                 const today = new Date();
                 
                 // Check if last update was from a previous day
@@ -207,18 +207,18 @@ class AuthService {
                     await this.database.updateDocument(
                         config.appwriteDatabaseId,
                         config.appwriteUserCollectionId,
-                        user.userDocId,
+                        updatedUser.userDocId,
                         {
                             queryCount: 0
                         }
                     );
                     
                     // Get updated user data
-                    user = await this.getCurrentUser();
+                    updatedUser = await this.getCurrentUser();
                 }
             }
 
-            return { session, user };
+            return { session, user: updatedUser };
         } catch (error) {
             console.error('Login error:', error);
             // Clear any existing session data
@@ -413,108 +413,83 @@ class AuthService {
 
             console.log('\n📤 Upload API Payload:', JSON.stringify(payload, null, 2));
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            console.log('\n📥 API Response Status:', response.status);
+            console.log('\n📥 API Response Headers:', Object.fromEntries(response.headers.entries()));
+
+            // Handle timeout response
+            if (response.status === 504) {
+                console.log('⏳ Timeout detected - continuing with upload');
+                return {
+                    success: true,
+                    message: "Document uploaded successfully",
+                    data: {
+                        ...fileUpload,
+                        ...documentData,
+                        ...metadata,
+                        previewUrl: DEFAULT_PDF_THUMBNAIL,
+                        viewUrl: documentUrl,
+                        userId
+                    }
+                };
+            }
+
+            const data = await response.json();
+            console.log('\n📥 API Response Data:', JSON.stringify(data, null, 2));
+            
+            // Parse the body if it's a string
+            let parsedBody = data.body;
+            if (typeof data.body === 'string') {
+                try {
+                    parsedBody = JSON.parse(data.body);
+                } catch (e) {
+                    console.warn('Failed to parse response body:', e);
+                }
+            }
+
+            // Check for specific EC2 error or other API errors
+            if (!response.ok || 
+                data.error || 
+                data.errorType || 
+                data.statusCode === 500 || 
+                parsedBody?.message === "No running EC2 instance found") {
+                
+                console.error('❌ API Error:', {
+                    status: response.status,
+                    statusCode: data.statusCode,
+                    message: parsedBody?.message || data.error || 'API processing failed'
                 });
 
-                console.log('\n📥 API Response Status:', response.status);
-                console.log('\n📥 API Response Headers:', Object.fromEntries(response.headers.entries()));
-
-                // Handle timeout response
-                if (response.status === 504) {
-                    console.log('⏳ Timeout detected - continuing with upload');
-                    return {
-                        success: true,
-                        message: "Document uploaded successfully",
-                        data: {
-                            ...fileUpload,
-                            ...documentData,
-                            ...metadata,
-                            previewUrl: DEFAULT_PDF_THUMBNAIL,
-                            viewUrl: documentUrl,
-                            userId
-                        }
-                    };
-                }
-
-                const data = await response.json();
-                console.log('\n📥 API Response Data:', JSON.stringify(data, null, 2));
-                
-                // Parse the body if it's a string
-                let parsedBody = data.body;
-                if (typeof data.body === 'string') {
-                    try {
-                        parsedBody = JSON.parse(data.body);
-                    } catch (e) {
-                        console.warn('Failed to parse response body:', e);
-                    }
-                }
-
-                // Check for specific EC2 error or other API errors
-                if (!response.ok || 
-                    data.error || 
-                    data.errorType || 
-                    data.statusCode === 500 || 
-                    parsedBody?.message === "No running EC2 instance found") {
-                    
-                    console.error('❌ API Error:', {
-                        status: response.status,
-                        statusCode: data.statusCode,
-                        message: parsedBody?.message || data.error || 'API processing failed'
-                    });
-
-                    // Cleanup resources
-                    await this.cleanupResources(documentData.$id, fileUpload.$id);
-                    throw new Error(parsedBody?.message || data.error || 'API processing failed');
-                }
-
-                // Only return success if we got here (no timeout, no errors)
-                if (response.ok && !data.error && !data.errorType && data.statusCode !== 500) {
-                    await this.incrementUserQueryCount(userId);
-                    return {
-                        success: true,
-                        data: {
-                            ...fileUpload,
-                            ...documentData,
-                            ...metadata,
-                            previewUrl: DEFAULT_PDF_THUMBNAIL,
-                            viewUrl: documentUrl,
-                            userId
-                        }
-                    };
-                }
-
-                // If we get here, something went wrong
-                throw new Error('Unexpected API response');
-
-            } catch (error) {
-                // If it's a timeout error, treat as success
-                if (error.message?.includes('timeout') || error.name === 'TimeoutError') {
-                    console.log('⏳ Timeout detected - continuing with upload');
-                    return {
-                        success: true,
-                        message: "Document uploaded successfully",
-                        data: {
-                            ...fileUpload,
-                            ...documentData,
-                            ...metadata,
-                            previewUrl: DEFAULT_PDF_THUMBNAIL,
-                            viewUrl: documentUrl,
-                            userId
-                        }
-                    };
-                }
-
-                // For other errors, cleanup and throw
+                // Cleanup resources
                 await this.cleanupResources(documentData.$id, fileUpload.$id);
-                throw error;
+                throw new Error(parsedBody?.message || data.error || 'API processing failed');
             }
+
+            // Return success if we got here (no timeout, no errors)
+            if (response.ok && !data.error && !data.errorType && data.statusCode !== 500) {
+                return {
+                    success: true,
+                    data: {
+                        ...fileUpload,
+                        ...documentData,
+                        ...metadata,
+                        previewUrl: DEFAULT_PDF_THUMBNAIL,
+                        viewUrl: documentUrl,
+                        userId
+                    }
+                };
+            }
+
+            // If we get here, something went wrong
+            throw new Error('Unexpected API response');
 
         } catch (error) {
             // Cleanup any created resources

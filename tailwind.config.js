@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import { fontFamily } from "tailwindcss/defaultTheme";
 import plugin from "tailwindcss/plugin";
-const { colors } = require('./src/config/config');
+const { colors } = require('./src/config/tailwind.config.js');
 
 export default {
   content: [

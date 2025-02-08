@@ -62,6 +62,18 @@ const Upload = () => {
     navigate('/dashboard');
   };
 
+  const validatePdfUrl = (url) => {
+    try {
+      // First check if it's a valid URL
+      new URL(url);
+      
+      // Check if URL ends with .pdf OR contains /pdf/ in the path
+      return url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/pdf/');
+    } catch (e) {
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -86,7 +98,7 @@ const Upload = () => {
       return;
     }
 
-    if (uploadType === 'url' && !validateUrl(fileUrl)) {
+    if (uploadType === 'url' && !validatePdfUrl(fileUrl)) {
       setErrorMessage('Please enter a valid PDF URL');
       setShowErrorModal(true);
       return;
@@ -178,15 +190,6 @@ const Upload = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    }
-  };
-
-  const validateUrl = (url) => {
-    try {
-      new URL(url); // Check if URL is valid
-      return url.trim() !== '' && url.toLowerCase().endsWith('.pdf');
-    } catch {
-      return false;
     }
   };
 
