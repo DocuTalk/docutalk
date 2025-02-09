@@ -1,7 +1,5 @@
 export const getVerificationUrl = () => {
-  const baseUrl = window.location.hostname === 'localhost'
-    ? 'http://localhost:5173'
-    : 'https://docutalk.github.io/docutalk';
-
-  return `${baseUrl}/verify`;
+  return window.location.hostname === 'localhost'
+    ? import.meta.env.VITE_DEV_VERIFY_URL
+    : import.meta.env.VITE_PROD_VERIFY_URL;
 }; 
