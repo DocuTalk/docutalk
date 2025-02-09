@@ -96,7 +96,6 @@ function App() {
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/guide" element={<Guide />} />
                 <Route path="/verify" element={<Verify />} />
-                <Route path="/docutalk/verify" element={<Verify />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import { gradient } from "../assets";
 import Button from './Button';
@@ -10,14 +10,14 @@ const Verify = () => {
   const [userData, setUserData] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const verify = async () => {
       try {
-        // Get the verification parameters from the URL
         const userId = searchParams.get('userId');
         const secret = searchParams.get('secret');
+
+        console.log('Verification params:', { userId, secret }); // For debugging
 
         if (!userId || !secret) {
           setVerificationStatus('Invalid verification link');
@@ -35,7 +35,11 @@ const Verify = () => {
 
       } catch (error) {
         console.error('Verification error:', error);
-        setVerificationStatus('Verification failed. Please try again or contact support.');
+        if (error.code === 401) {
+          setVerificationStatus('Verification link has expired or is invalid. Please request a new one.');
+        } else {
+          setVerificationStatus('Verification failed. Please try again or contact support.');
+        }
       }
     };
 
