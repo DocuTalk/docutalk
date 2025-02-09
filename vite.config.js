@@ -52,7 +52,7 @@ export default defineConfig(({ command, mode }) => {
       exclude: []
     },
     build: {
-      outDir: 'build',
+      outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
       sourcemap: true,
@@ -62,7 +62,14 @@ export default defineConfig(({ command, mode }) => {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
             appwrite: ['appwrite']
-          }
+          },
+          assetFileNames: (assetInfo) => {
+            let extType = assetInfo.name.split('.')[1];
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+              extType = 'img';
+            }
+            return `assets/${extType}/[name]-[hash][extname]`;
+          },
         }
       }
     },

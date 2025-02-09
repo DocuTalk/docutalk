@@ -49,7 +49,7 @@ function App() {
   return (
     <SessionProvider>
       <Toaster position="top-center" />
-      <Router {...router}>
+      <Router basename="/docutalk" {...router}>
         <>
           <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden bg-n-8">
             <Header />
