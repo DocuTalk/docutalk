@@ -7,6 +7,7 @@ import authService from "../lib/appwrite";
 import { useSession } from '../context/SessionContext';
 import { toast } from 'react-hot-toast';
 import { account } from '../lib/appwrite';
+import { getVerificationUrl } from '../utils/urlUtils';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -76,11 +77,7 @@ const Signup = () => {
         // Create session and get the user data
         await checkSession();
         
-        // Get the correct verification URL based on environment
-        const verifyUrl = window.location.hostname === 'localhost' 
-          ? import.meta.env.VITE_DEV_VERIFY_URL
-          : import.meta.env.VITE_PROD_VERIFY_URL;
-        
+        const verifyUrl = getVerificationUrl();
         console.log('Using verification URL:', verifyUrl); // For debugging
         
         await account.createVerification(verifyUrl);

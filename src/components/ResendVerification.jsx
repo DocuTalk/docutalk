@@ -1,13 +1,11 @@
 import { account } from '../lib/appwrite';
 import { toast } from 'react-hot-toast';
+import { getVerificationUrl } from '../utils/urlUtils';
 
 const ResendVerification = () => {
   const handleResend = async () => {
     try {
-      const verifyUrl = window.location.hostname === 'localhost' 
-        ? import.meta.env.VITE_DEV_VERIFY_URL
-        : import.meta.env.VITE_PROD_VERIFY_URL;
-
+      const verifyUrl = getVerificationUrl();
       console.log('Using verification URL:', verifyUrl); // For debugging
       
       await account.createVerification(verifyUrl);
