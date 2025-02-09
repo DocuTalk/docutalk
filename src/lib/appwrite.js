@@ -6,7 +6,7 @@ const DEFAULT_PDF_THUMBNAIL = 'https://cdn4.iconfinder.com/data/icons/file-exten
 class AuthService {
     constructor() {
         this.client = new Client()
-            .setEndpoint(config.appwriteEndpoint)
+            .setEndpoint('https://cloud.appwrite.io/v1')  // Hardcode the endpoint
             .setProject(config.appwriteProjectId);
         
         this.account = new Account(this.client);
