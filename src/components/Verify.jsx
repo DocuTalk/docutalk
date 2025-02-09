@@ -13,36 +13,34 @@ const Verify = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Get params regardless of whether the URL includes /docutalk or not
-    const secret = searchParams.get('secret');
-    const userId = searchParams.get('userId');
-
-    if (!secret || !userId) {
-      setVerificationStatus('Invalid verification link');
-      return;
-    }
-
-    const verifyUser = async () => {
+    const verify = async () => {
       try {
+        // Get the verification parameters from the URL
+        const userId = searchParams.get('userId');
+        const secret = searchParams.get('secret');
+
+        if (!userId || !secret) {
+          setVerificationStatus('Invalid verification link');
+          return;
+        }
+
+        // Update verification in Appwrite
         await account.updateVerification(userId, secret);
-        setVerificationStatus('Email verified successfully!');
         
         // Get user data after verification
-        try {
-          const user = await account.get();
-          setUserData(user);
-          setShowModal(true);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+        const user = await account.get();
+        setUserData(user);
+        setShowModal(true);
+        setVerificationStatus('Email verified successfully!');
+
       } catch (error) {
         console.error('Verification error:', error);
-        setVerificationStatus('Verification failed. Please try again.');
+        setVerificationStatus('Verification failed. Please try again or contact support.');
       }
     };
 
-    verifyUser();
-  }, [searchParams, navigate]);
+    verify();
+  }, [searchParams]);
 
   const handleOkClick = () => {
     navigate('/');

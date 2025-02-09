@@ -9,7 +9,7 @@ export default defineConfig(({ command, mode }) => {
   
   return {
     plugins: [react()],
-    base: '/docutalk', // This is important for GitHub Pages
+    base: '/docutalk/',
     envPrefix: 'VITE_',
     envDir: '.',  // Look for .env files in root
     define: {
