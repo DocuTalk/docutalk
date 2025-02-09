@@ -27,6 +27,11 @@ const Upload = () => {
   const [documentCount, setDocumentCount] = useState(0);
   const [isCountLoading, setIsCountLoading] = useState(true);
   const STANDARD_MAX_DOC_COUNT = config.standardMaxDocCount;
+  const MAX_TITLE_LENGTH = 50;
+  const MAX_AUTHOR_LENGTH = 50;
+  const MAX_DESCRIPTION_LENGTH = 100;
+  const MAX_FILE_SIZE_MB = 5;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // Convert to bytes
 
   const fetchDocumentCount = async () => {
     setIsCountLoading(true);
@@ -49,12 +54,26 @@ const Upload = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-    } else {
+    if (!file) return;
+
+    // Check file type
+    if (file.type !== 'application/pdf') {
       setErrorMessage('Please select a valid PDF file.');
       setShowErrorModal(true);
+      return;
     }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setErrorMessage(`File size must be less than ${MAX_FILE_SIZE_MB}MB.`);
+      setShowErrorModal(true);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    setSelectedFile(file);
   };
 
   const handleSuccessModalClose = () => {
@@ -78,6 +97,25 @@ const Upload = () => {
     e.preventDefault();
     
     await fetchDocumentCount();
+
+    // Validate field lengths
+    if (documentTitle.length > MAX_TITLE_LENGTH) {
+      setErrorMessage(`Document title must be ${MAX_TITLE_LENGTH} characters or less`);
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (author.length > MAX_AUTHOR_LENGTH) {
+      setErrorMessage(`Author name must be ${MAX_AUTHOR_LENGTH} characters or less`);
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      setErrorMessage(`Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`);
+      setShowErrorModal(true);
+      return;
+    }
 
     if (documentCount >= STANDARD_MAX_DOC_COUNT) {
       const message = documentCount === STANDARD_MAX_DOC_COUNT 
@@ -125,7 +163,19 @@ const Upload = () => {
             throw new Error('URL does not point to a valid PDF file');
           }
 
+          // Get file size from headers if available
+          const contentLength = response.headers.get('content-length');
+          if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE_BYTES) {
+            throw new Error(`File size must be less than ${MAX_FILE_SIZE_MB}MB`);
+          }
+
           const blob = await response.blob();
+          
+          // Double check blob size after download
+          if (blob.size > MAX_FILE_SIZE_BYTES) {
+            throw new Error(`File size must be less than ${MAX_FILE_SIZE_MB}MB`);
+          }
+
           const fileName = documentTitle.trim() + '.pdf';
           const file = new File([blob], fileName, { type: 'application/pdf' });
           
@@ -154,9 +204,20 @@ const Upload = () => {
 
           throw new Error('Upload failed');
         } catch (error) {
-          throw error;
+          setErrorMessage(error.message);
+          setShowErrorModal(true);
+          setIsUploading(false);
+          return;
         }
       } else {
+        // Check file size again before upload (for local files)
+        if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+          setErrorMessage(`File size must be less than ${MAX_FILE_SIZE_MB}MB`);
+          setShowErrorModal(true);
+          setIsUploading(false);
+          return;
+        }
+
         const uploadResponse = await authService.uploadDocument(selectedFile, user.userDocId, {
           title: documentTitle.trim(),
           author: author.trim(),
@@ -283,9 +344,10 @@ const Upload = () => {
                 <input
                   type="text"
                   value={documentTitle}
-                  onChange={(e) => setDocumentTitle(e.target.value)}
+                  onChange={(e) => setDocumentTitle(e.target.value.slice(0, MAX_TITLE_LENGTH))}
                   className="w-full h-12 px-4 bg-n-6 rounded-lg border border-n-6 focus:border-n-5 outline-none transition-colors"
                   placeholder="Enter document title"
+                  maxLength={MAX_TITLE_LENGTH}
                   required
                 />
               </div>
@@ -296,27 +358,35 @@ const Upload = () => {
                 <input
                   type="text"
                   value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
+                  onChange={(e) => setAuthor(e.target.value.slice(0, MAX_AUTHOR_LENGTH))}
                   className="w-full h-12 px-4 bg-n-6 rounded-lg border border-n-6 focus:border-n-5 outline-none transition-colors"
                   placeholder="Enter author name"
+                  maxLength={MAX_AUTHOR_LENGTH}
                 />
               </div>
 
-              {/* Description */}
+              {/* Description - Keep the character counter here */}
               <div>
                 <label className="block mb-2 text-n-1">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full h-32 px-4 py-3 bg-n-6 rounded-lg border border-n-6 focus:border-n-5 outline-none transition-colors resize-none"
-                  placeholder="Enter document description"
-                />
+                <div className="relative">
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
+                    className="w-full h-32 px-4 py-3 bg-n-6 rounded-lg border border-n-6 focus:border-n-5 outline-none transition-colors resize-none"
+                    placeholder="Enter document description"
+                    maxLength={MAX_DESCRIPTION_LENGTH}
+                  />
+                  <span className="absolute right-3 bottom-3 text-xs text-n-3">
+                    {description.length}/{MAX_DESCRIPTION_LENGTH}
+                  </span>
+                </div>
               </div>
 
               {/* File Upload or URL Input */}
               <div>
                 <label className="block mb-2 text-n-1">
                   {uploadType === 'url' ? 'PDF URL' : 'PDF File'} <span className="text-color-1">*</span>
+                  <span className="text-n-3 text-sm ml-2">(Max {MAX_FILE_SIZE_MB}MB)</span>
                 </label>
                 
                 {uploadType === 'url' ? (

@@ -5,6 +5,8 @@ import { gradient } from "../assets";
 import Button from "./Button";
 import authService from "../lib/appwrite";
 import { useSession } from '../context/SessionContext';
+import { toast } from 'react-hot-toast';
+import { account } from '../lib/appwrite';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -17,6 +19,10 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const verifyUrl = import.meta.env.PROD 
+    ? import.meta.env.VITE_PROD_VERIFY_URL 
+    : import.meta.env.VITE_DEV_VERIFY_URL;
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -67,20 +73,58 @@ const Signup = () => {
     setLoading(true);
 
     try {
+      // Create account first
       const response = await authService.createAccount(formData);
+      
       if (response?.currentUser?.$id) {
-        // Update session context
+        // Create session and get the user data
         await checkSession();
         
-        console.log('Account created successfully!');
+        // Now send verification email after successful account creation and session
+        const verifyUrl = import.meta.env.PROD 
+          ? import.meta.env.VITE_PROD_VERIFY_URL 
+          : import.meta.env.VITE_DEV_VERIFY_URL;
+          
+        await account.createVerification(verifyUrl);
+        
+        // Custom styled toast
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? 'animate-enter' : 'animate-leave'
+            } max-w-md w-full bg-n-7 border border-n-6 shadow-lg rounded-2xl pointer-events-auto flex items-center`}
+          >
+            <div className="flex-1 w-0 p-4">
+              <div className="flex items-start">
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-color-1">
+                    Verification Email Sent
+                  </p>
+                  <p className="mt-1 text-sm text-n-3">
+                    Please check your inbox to verify your email address
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex border-l border-n-6">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-n-1 hover:text-color-1 focus:outline-none"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ), {
+          duration: 5000,
+          position: 'top-center',
+        });
         
         // Navigate to dashboard
         navigate('/dashboard', { 
           replace: true,
           state: { from: 'signup' }
         });
-      } else {
-        throw new Error('Failed to create account: Invalid response');
       }
     } catch (error) {
       console.error("Signup error:", error);

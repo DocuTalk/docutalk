@@ -18,6 +18,8 @@ import About from './pages/About';
 import EditProfile from './pages/EditProfile';
 import FAQs from './pages/FAQs';
 import Guide from './pages/Guide';
+import Verify from './components/Verify';
+import { Toaster } from 'react-hot-toast';
 
 // Add future flags for React Router v7
 const router = {
@@ -46,6 +48,7 @@ function App() {
   
   return (
     <SessionProvider>
+      <Toaster position="top-center" />
       <Router {...router}>
         <>
           <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden bg-n-8">
@@ -92,6 +95,8 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/guide" element={<Guide />} />
+                <Route path="/verify" element={<Verify />} />
+                <Route path="/docutalk/verify" element={<Verify />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

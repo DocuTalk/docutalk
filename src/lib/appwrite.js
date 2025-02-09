@@ -3,16 +3,26 @@ import config from '../config/config';
 
 const DEFAULT_PDF_THUMBNAIL = 'https://cdn4.iconfinder.com/data/icons/file-extension-names-vol-8/512/24-512.png';
 
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
+
+// Initialize Account
+export const account = new Account(client);
+
+// Initialize Database
+export const databases = new Databases(client);
+
+// Initialize Storage
+export const storage = new Storage(client);
+
 class AuthService {
     constructor() {
-        this.client = new Client()
-            .setEndpoint('https://cloud.appwrite.io/v1')  // Hardcode the endpoint
-            .setProject(config.appwriteProjectId);
-        
+        this.client = client;
         this.account = new Account(this.client);
-        this.database = new Databases(this.client);
+        this.databases = databases;
+        this.storage = storage;
         this.avatars = new Avatars(this.client);
-        this.storage = new Storage(this.client);
     }
 
     // Initialize check - can be called when app starts
@@ -50,7 +60,7 @@ class AuthService {
             const account = await this.account.get();
             
             // Fetch user document from collection
-            const userDocs = await this.database.listDocuments(
+            const userDocs = await this.databases.listDocuments(
                 config.appwriteDatabaseId,
                 config.appwriteUserCollectionId,
                 [
@@ -110,7 +120,7 @@ class AuthService {
 
             // Create user document in the users collection with queryCount and userType
             console.log('Creating user document...');
-            const userDoc = await this.database.createDocument(
+            const userDoc = await this.databases.createDocument(
                 config.appwriteDatabaseId,
                 config.appwriteUserCollectionId,
                 ID.unique(),
@@ -203,7 +213,7 @@ class AuthService {
                     console.log('Resetting query count - new day');
                     
                     // Reset query count to 0
-                    await this.database.updateDocument(
+                    await this.databases.updateDocument(
                         config.appwriteDatabaseId,
                         config.appwriteUserCollectionId,
                         updatedUser.userDocId,
@@ -302,7 +312,7 @@ class AuthService {
     // Get user's document count
     async getUserDocumentCount(userDocId) {
         try {
-            const { total } = await this.database.listDocuments(
+            const { total } = await this.databases.listDocuments(
                 config.appwriteDatabaseId,
                 config.appwriteDocCollectionId,
                 [Query.equal('users', userDocId), Query.limit(1)]
@@ -345,7 +355,7 @@ class AuthService {
     // Add this method to AuthService class
     async getUserDocuments(userId) {
         try {
-            const response = await this.database.listDocuments(
+            const response = await this.databases.listDocuments(
                 config.appwriteDatabaseId,
                 config.appwriteDocCollectionId,
                 [
@@ -379,7 +389,7 @@ class AuthService {
             ).toString();
 
             // Create document in documents collection
-            documentData = await this.database.createDocument(
+            documentData = await this.databases.createDocument(
                 config.appwriteDatabaseId,
                 config.appwriteDocCollectionId,
                 ID.unique(),
@@ -452,7 +462,7 @@ class AuthService {
         if (documentId) {
             try {
                 console.log('\n🗑️ Cleaning up document:', documentId);
-                await this.database.deleteDocument(
+                await this.databases.deleteDocument(
                     config.appwriteDatabaseId,
                     config.appwriteDocCollectionId,
                     documentId
@@ -482,7 +492,7 @@ class AuthService {
             console.log('\n🔍 Starting document deletion process for:', documentId);
 
             // First get the document from collection
-            const document = await this.database.getDocument(
+            const document = await this.databases.getDocument(
                 config.appwriteDatabaseId,
                 config.appwriteDocCollectionId,
                 documentId
@@ -564,7 +574,7 @@ class AuthService {
                 console.log('\n✅ File deleted successfully');
 
                 console.log('\n🗑️ Deleting document from collection:', documentId);
-                await this.database.deleteDocument(
+                await this.databases.deleteDocument(
                     config.appwriteDatabaseId,
                     config.appwriteDocCollectionId,
                     documentId
@@ -584,7 +594,7 @@ class AuthService {
 
     async getUserQueryCount(userId) {
         try {
-            const userDocs = await this.database.listDocuments(
+            const userDocs = await this.databases.listDocuments(
                 config.appwriteDatabaseId,
                 config.appwriteUserCollectionId,
                 [Query.equal('accountId', userId)]
@@ -604,7 +614,7 @@ class AuthService {
     async incrementUserQueryCount(userId) {
         try {
             // First get the user document
-            const userDocs = await this.database.listDocuments(
+            const userDocs = await this.databases.listDocuments(
                 config.appwriteDatabaseId,
                 config.appwriteUserCollectionId,
                 [Query.equal('accountId', userId)]
@@ -617,7 +627,7 @@ class AuthService {
             const userDoc = userDocs.documents[0];
             
             // Update the document with incremented queryCount
-            await this.database.updateDocument(
+            await this.databases.updateDocument(
                 config.appwriteDatabaseId,
                 config.appwriteUserCollectionId,
                 userDoc.$id,
