@@ -20,10 +20,6 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const verifyUrl = import.meta.env.PROD 
-    ? import.meta.env.VITE_PROD_VERIFY_URL 
-    : import.meta.env.VITE_DEV_VERIFY_URL;
-
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
@@ -80,11 +76,13 @@ const Signup = () => {
         // Create session and get the user data
         await checkSession();
         
-        // Now send verification email after successful account creation and session
-        const verifyUrl = import.meta.env.PROD 
-          ? import.meta.env.VITE_PROD_VERIFY_URL 
-          : import.meta.env.VITE_DEV_VERIFY_URL;
-          
+        // Get the correct verification URL based on environment
+        const verifyUrl = window.location.hostname === 'localhost' 
+          ? import.meta.env.VITE_DEV_VERIFY_URL
+          : import.meta.env.VITE_PROD_VERIFY_URL;
+        
+        console.log('Using verification URL:', verifyUrl); // For debugging
+        
         await account.createVerification(verifyUrl);
         
         // Custom styled toast
