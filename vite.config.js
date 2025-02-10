@@ -3,35 +3,31 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
   // Load env file based on mode
   const env = loadEnv(mode, process.cwd(), '')
   
   const isProduction = mode === 'production'
+  const base = isProduction ? '/' : '/docutalk/'
   
   return {
     plugins: [react()],
-    base: isProduction ? '/' : '/docutalk/',
+    base, // This will be '/' in production
     envPrefix: 'VITE_',
-    envDir: '.',  // Look for .env files in root
+    envDir: '.',
     define: {
       __DEV__: mode === 'development',
       // Expose env variables to client
-      'process.env.VITE_APPWRITE_PROJECT_ID': JSON.stringify(env.VITE_APPWRITE_PROJECT_ID),
-      'process.env.VITE_APPWRITE_DATABASE_ID': JSON.stringify(env.VITE_APPWRITE_DATABASE_ID),
-      'process.env.VITE_APPWRITE_STORAGE_ID': JSON.stringify(env.VITE_APPWRITE_STORAGE_ID),
-      'process.env.VITE_APPWRITE_USER_COLLECTION_ID': JSON.stringify(env.VITE_APPWRITE_USER_COLLECTION_ID),
-      'process.env.VITE_APPWRITE_DOC_COLLECTION_ID': JSON.stringify(env.VITE_APPWRITE_DOC_COLLECTION_ID),
-      'process.env.VITE_DEV_API_ENDPOINT': JSON.stringify(env.VITE_DEV_API_ENDPOINT),
-      'process.env.VITE_UPLOAD_API_ENDPOINT': JSON.stringify(env.VITE_UPLOAD_API_ENDPOINT),
-      'process.env.VITE_DELETE_API_ENDPOINT': JSON.stringify(env.VITE_DELETE_API_ENDPOINT),
-      'process.env.VITE_QUERY_API_ENDPOINT': JSON.stringify(env.VITE_QUERY_API_ENDPOINT),
-      'process.env.VITE_MAX_QUERY_COUNT': JSON.stringify(env.VITE_MAX_QUERY_COUNT),
-      'process.env.VITE_MAX_DOC_COUNT': JSON.stringify(env.VITE_MAX_DOC_COUNT)
+      ...Object.keys(env).reduce((acc, key) => {
+        if (key.startsWith('VITE_')) {
+          acc[`process.env.${key}`] = JSON.stringify(env[key])
+        }
+        return acc
+      }, {})
     },
     server: {
       cors: {
-        origin: ['https://docutalk.github.io', 'http://localhost:5173'],
+        origin: ['https://docutalk.co.uk', 'http://localhost:5173'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         credentials: true
       },
@@ -57,20 +53,36 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
-      sourcemap: true,
+      sourcemap: false, // Set to false in production
       rollupOptions: {
         external: [],
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
             appwrite: ['appwrite']
-          }
+          },
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name.split('.')
+            const extType = info[info.length - 1]
+            if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
+              return `assets/media/[name]-[hash][extname]`
+            }
+            if (/\.(png|jpe?g|gif|svg|webp|ico)(\?.*)?$/i.test(assetInfo.name)) {
+              return `assets/img/[name]-[hash][extname]`
+            }
+            if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
+              return `assets/fonts/[name]-[hash][extname]`
+            }
+            return `assets/[name]-[hash][extname]`
+          },
+          chunkFileNames: 'assets/js/[name]-[hash].js',
+          entryFileNames: 'assets/js/[name]-[hash].js',
         }
       }
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src')
+        '@': path.resolve(process.cwd(), './src')
       }
     }
   }
