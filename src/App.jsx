@@ -49,7 +49,7 @@ function App() {
   return (
     <SessionProvider>
       <Toaster position="top-center" />
-      <Router basename="/docutalk" {...router}>
+      <Router {...router}>
         <>
           <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden bg-n-8">
             <Header />
@@ -96,6 +96,7 @@ function App() {
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/guide" element={<Guide />} />
                 <Route path="/verify" element={<Verify />} />
+                <Route path="/docutalk/verify" element={<Verify />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

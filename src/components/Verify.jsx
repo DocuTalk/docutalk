@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import { gradient } from "../assets";
 import Button from './Button';
@@ -10,41 +10,39 @@ const Verify = () => {
   const [userData, setUserData] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const verify = async () => {
+    // Get params regardless of whether the URL includes /docutalk or not
+    const secret = searchParams.get('secret');
+    const userId = searchParams.get('userId');
+
+    if (!secret || !userId) {
+      setVerificationStatus('Invalid verification link');
+      return;
+    }
+
+    const verifyUser = async () => {
       try {
-        const userId = searchParams.get('userId');
-        const secret = searchParams.get('secret');
-
-        console.log('Verification params:', { userId, secret }); // For debugging
-
-        if (!userId || !secret) {
-          setVerificationStatus('Invalid verification link');
-          return;
-        }
-
-        // Update verification in Appwrite
         await account.updateVerification(userId, secret);
+        setVerificationStatus('Email verified successfully!');
         
         // Get user data after verification
-        const user = await account.get();
-        setUserData(user);
-        setShowModal(true);
-        setVerificationStatus('Email verified successfully!');
-
+        try {
+          const user = await account.get();
+          setUserData(user);
+          setShowModal(true);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
       } catch (error) {
         console.error('Verification error:', error);
-        if (error.code === 401) {
-          setVerificationStatus('Verification link has expired or is invalid. Please request a new one.');
-        } else {
-          setVerificationStatus('Verification failed. Please try again or contact support.');
-        }
+        setVerificationStatus('Verification failed. Please try again.');
       }
     };
 
-    verify();
-  }, [searchParams]);
+    verifyUser();
+  }, [searchParams, navigate]);
 
   const handleOkClick = () => {
     navigate('/');

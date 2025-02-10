@@ -7,9 +7,11 @@ export default defineConfig(({ command, mode }) => {
   // Load env file based on mode
   const env = loadEnv(mode, process.cwd(), '')
   
+  const isProduction = mode === 'production'
+  
   return {
     plugins: [react()],
-    base: '/docutalk/',
+    base: isProduction ? '/' : '/docutalk/',
     envPrefix: 'VITE_',
     envDir: '.',  // Look for .env files in root
     define: {
@@ -62,14 +64,7 @@ export default defineConfig(({ command, mode }) => {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
             appwrite: ['appwrite']
-          },
-          assetFileNames: (assetInfo) => {
-            let extType = assetInfo.name.split('.')[1];
-            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
-              extType = 'img';
-            }
-            return `assets/${extType}/[name]-[hash][extname]`;
-          },
+          }
         }
       }
     },
