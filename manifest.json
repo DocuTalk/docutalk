@@ -1,0 +1,37 @@
+{
+  "name": "DocuTalk",
+  "short_name": "DocuTalk",
+  "description": "AI-powered document analysis and chat platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icons/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "scope": "/",
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.docutalk.app",
+      "id": "com.docutalk.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/gb/app/docutalk/id6741073046"
+    }
+  ]
+} 

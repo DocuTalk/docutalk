@@ -1,0 +1,5 @@
+# App-ads.txt file for DocuTalk
+# Last updated: 2024-02-25
+# More info: https://developers.google.com/admob/android/app-ads
+
+google.com, pub-4760732803417604, DIRECT, f08c47fec0942fa0 
